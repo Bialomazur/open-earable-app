@@ -24,6 +24,7 @@ class ConnectDevicesPage extends StatefulWidget {
 class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
   final WearableManager _wearableManager = WearableManager();
   StreamSubscription? _scanSubscription;
+  StreamSubscription? _firmwareUpdateSubscription;
 
   List<DiscoveredDevice> discoveredDevices = [];
   Map<String, bool> connectingDevices = {};
@@ -32,6 +33,44 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
   void initState() {
     super.initState();
     _startScanning();
+    // Subscribe to firmware update events from the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<WearablesProvider>(context, listen: false);
+      _firmwareUpdateSubscription = provider.firmwareUpdateStream.listen((event) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) => PlatformAlertDialog(
+            title: PlatformText('Firmware Update Available'),
+            content: PlatformText(
+              'A newer firmware version (${event.latestVersion}) is available. You are using version ${event.currentVersion}.',
+            ),
+            actions: [
+              PlatformTextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: PlatformText('Later'),
+              ),
+              PlatformTextButton(
+                onPressed: () {
+                  Provider.of<FirmwareUpdateRequestProvider>(
+                    context,
+                    listen: false,
+                  ).setSelectedPeripheral(event.wearable);
+                  Navigator.of(context).pop();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FotaWarningPage(),
+                    ),
+                  );
+                },
+                child: PlatformText('Update Now'),
+              ),
+            ],
+          ),
+        );
+      });
+    });
   }
 
   @override
@@ -132,7 +171,8 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
       setState(() {
         discoveredDevices.remove(device);
       });
-      checkForNewerFirmware(wearable);
+      // Ask provider to check for newer firmware; provider will emit events handled above
+      Provider.of<WearablesProvider>(context, listen: false).checkForNewerFirmware(wearable);
     } catch (e) {
       logger.e('Failed to connect to device: ${device.name}, error: $e');
     } finally {
@@ -142,63 +182,10 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
     }
   }
 
-  void checkForNewerFirmware(Wearable wearable) async {
-    // TODO: move this to wearablesProvider
-    logger.d('Checking for newer firmware for ${wearable.name}');
-    if (wearable is DeviceFirmwareVersion) {
-      final currentVersion =
-          await (wearable as DeviceFirmwareVersion).readDeviceFirmwareVersion();
-      if (currentVersion == null || currentVersion.isEmpty) {
-        return;
-      }
-      final firmwareImageRepository = FirmwareImageRepository();
-      var latestVersion = await firmwareImageRepository
-          .getLatestFirmwareVersion()
-          .then((version) => version.toString());
-      if (firmwareImageRepository.isNewerVersion(
-        latestVersion,
-        currentVersion,
-      )) {
-        print("Checking");
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          builder: (context) => PlatformAlertDialog(
-            title: PlatformText('Firmware Update Available'),
-            content: PlatformText(
-              'A newer firmware version ($latestVersion) is available. You are using version $currentVersion.',
-            ),
-            actions: [
-              PlatformTextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: PlatformText('Later'),
-              ),
-              PlatformTextButton(
-                onPressed: () {
-                  Provider.of<FirmwareUpdateRequestProvider>(
-                    context,
-                    listen: false,
-                  ).setSelectedPeripheral(wearable);
-                  Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FotaWarningPage(),
-                    ),
-                  );
-                },
-                child: PlatformText('Update Now'),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
   @override
   void dispose() {
     _scanSubscription?.cancel();
+    _firmwareUpdateSubscription?.cancel();
     super.dispose();
   }
 }

@@ -53,6 +53,14 @@ class WearableErrorEvent extends WearableEvent {
       'WearableErrorEvent for ${wearable.name}: $errorMessage, description: $description';
 }
 
+// Firmware update event emitted by WearablesProvider when a newer firmware is found.
+class FirmwareUpdateAvailableEvent {
+  final Wearable wearable;
+  final String latestVersion;
+  final String currentVersion;
+  FirmwareUpdateAvailableEvent(this.wearable, this.latestVersion, this.currentVersion);
+}
+
 class WearablesProvider with ChangeNotifier {
   final List<Wearable> _wearables = [];
   final Map<Wearable, SensorConfigurationProvider>
@@ -70,6 +78,36 @@ class WearablesProvider with ChangeNotifier {
   final _wearableEventController =
       StreamController<WearableEvent>.broadcast();
   Stream<WearableEvent> get wearableEventStream => _wearableEventController.stream;
+
+  final _firmwareUpdateController =
+      StreamController<FirmwareUpdateAvailableEvent>.broadcast();
+  Stream<FirmwareUpdateAvailableEvent> get firmwareUpdateStream =>
+      _firmwareUpdateController.stream;
+
+  /// Checks for newer firmware for the given wearable and emits an event
+  /// when a newer firmware is available. Non-blocking for the caller.
+  Future<void> checkForNewerFirmware(Wearable wearable) async {
+    try {
+      logger.d('Checking for newer firmware for ${wearable.name}');
+      if (wearable is DeviceFirmwareVersion) {
+        final currentVersion =
+            await (wearable as DeviceFirmwareVersion).readDeviceFirmwareVersion();
+        if (currentVersion == null || currentVersion.isEmpty) return;
+
+        final firmwareImageRepository = FirmwareImageRepository();
+        final latestVersionObj = await firmwareImageRepository.getLatestFirmwareVersion();
+        final latestVersion = latestVersionObj.toString();
+
+        if (firmwareImageRepository.isNewerVersion(latestVersion, currentVersion)) {
+          _firmwareUpdateController.add(
+            FirmwareUpdateAvailableEvent(wearable, latestVersion, currentVersion),
+          );
+        }
+      }
+    } catch (e, st) {
+      logger.w('Firmware check failed for ${wearable.name}: $e\n$st');
+    }
+  }
 
   void addWearable(Wearable wearable) {
     // 1) Fast path: ignore duplicates and push into lists/maps synchronously
@@ -135,6 +173,7 @@ class WearablesProvider with ChangeNotifier {
       );
     }
   }
+
 
   // --- Helpers ---------------------------------------------------------------
 
@@ -206,6 +245,14 @@ class WearablesProvider with ChangeNotifier {
     _wearables.remove(wearable);
     _sensorConfigurationProviders.remove(wearable);
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _unsupportedFirmwareEventsController.close();
+    _wearableEventController.close();
+    _firmwareUpdateController.close();
+    super.dispose();
   }
 
   SensorConfigurationProvider getSensorConfigurationProvider(
