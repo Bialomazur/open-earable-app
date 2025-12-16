@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_wearable/apps/posture_tracker/model/bad_posture_reminder.dart';
 import 'package:open_wearable/apps/posture_tracker/view_model/posture_tracker_view_model.dart';
@@ -86,25 +87,32 @@ class _SettingsViewState extends State<SettingsView> {
                     trailing: SizedBox(
                       height: 37.0,
                       width: 52,
-                      //TODO: use cupertino text field on ios
-                      child: TextField(
-                        controller: _rollAngleThresholdController,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            floatingLabelBehavior:
-                                FloatingLabelBehavior.never,
-                            border: OutlineInputBorder(),
-                            labelText: 'Roll',
-                            filled: true,
-                            labelStyle: TextStyle(color: Colors.black),
-                            fillColor: Colors.white,),
-                        keyboardType: TextInputType.number,
-                        onChanged: (_) {
-                          _updatePostureSettings();
-                        },
-                      ),
+                      // Use CupertinoTextField on iOS, TextField otherwise
+                      child: Theme.of(context).platform == TargetPlatform.iOS
+                          ? CupertinoTextField(
+                              controller: _rollAngleThresholdController,
+                              textAlign: TextAlign.end,
+                              placeholder: 'Roll',
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            )
+                          : TextField(
+                              controller: _rollAngleThresholdController,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Roll',
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black),
+                                  fillColor: Colors.white,),
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                            ),
                     ),
                   ),
                   PlatformListTile(
@@ -112,25 +120,32 @@ class _SettingsViewState extends State<SettingsView> {
                     trailing: SizedBox(
                       height: 37.0,
                       width: 52,
-                      //TODO: use cupertino text field on ios
-                      child: TextField(
-                        controller: _pitchAngleThresholdController,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            floatingLabelBehavior:
-                                FloatingLabelBehavior.never,
-                            border: OutlineInputBorder(),
-                            labelText: 'Pitch',
-                            filled: true,
-                            labelStyle: TextStyle(color: Colors.black),
-                            fillColor: Colors.white,),
-                        keyboardType: TextInputType.number,
-                        onChanged: (_) {
-                          _updatePostureSettings();
-                        },
-                      ),
+                      // Use CupertinoTextField on iOS, TextField otherwise
+                      child: Theme.of(context).platform == TargetPlatform.iOS
+                          ? CupertinoTextField(
+                              controller: _pitchAngleThresholdController,
+                              textAlign: TextAlign.end,
+                              placeholder: 'Pitch',
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            )
+                          : TextField(
+                              controller: _pitchAngleThresholdController,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Pitch',
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black),
+                                  fillColor: Colors.white,),
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                            ),
                     ),
                   ),
                   PlatformListTile(
@@ -138,25 +153,32 @@ class _SettingsViewState extends State<SettingsView> {
                     trailing: SizedBox(
                       height: 37.0,
                       width: 52,
-                      //TODO: use cupertino text field on ios
-                      child: TextField(
-                        controller: _badPostureTimeThresholdController,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            floatingLabelBehavior:
-                                FloatingLabelBehavior.never,
-                            border: OutlineInputBorder(),
-                            labelText: 'Seconds',
-                            filled: true,
-                            labelStyle: TextStyle(color: Colors.black),
-                            fillColor: Colors.white,),
-                        keyboardType: TextInputType.number,
-                        onChanged: (_) {
-                          _updatePostureSettings();
-                        },
-                      ),
+                      // Use CupertinoTextField on iOS, TextField otherwise
+                      child: Theme.of(context).platform == TargetPlatform.iOS
+                          ? CupertinoTextField(
+                              controller: _badPostureTimeThresholdController,
+                              textAlign: TextAlign.end,
+                              placeholder: 'Seconds',
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            )
+                          : TextField(
+                              controller: _badPostureTimeThresholdController,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Seconds',
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black),
+                                  fillColor: Colors.white,),
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                            ),
                     ),
                   ),
                   PlatformListTile(
@@ -164,25 +186,32 @@ class _SettingsViewState extends State<SettingsView> {
                     trailing: SizedBox(
                       height: 37.0,
                       width: 52,
-                      //TODO: use cupertino text field on ios
-                      child: TextField(
-                        controller: _goodPostureTimeThresholdController,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            floatingLabelBehavior:
-                                FloatingLabelBehavior.never,
-                            border: OutlineInputBorder(),
-                            labelText: 'Seconds',
-                            filled: true,
-                            labelStyle: TextStyle(color: Colors.black),
-                            fillColor: Colors.white,),
-                        keyboardType: TextInputType.number,
-                        onChanged: (_) {
-                          _updatePostureSettings();
-                        },
-                      ),
+                      // Use CupertinoTextField on iOS, TextField otherwise
+                      child: Theme.of(context).platform == TargetPlatform.iOS
+                          ? CupertinoTextField(
+                              controller: _goodPostureTimeThresholdController,
+                              textAlign: TextAlign.end,
+                              placeholder: 'Seconds',
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            )
+                          : TextField(
+                              controller: _goodPostureTimeThresholdController,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Seconds',
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black),
+                                  fillColor: Colors.white,),
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => _updatePostureSettings(),
+                            ),
                     ),
                   ),
                 ],),),
