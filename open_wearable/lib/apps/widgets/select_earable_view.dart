@@ -38,7 +38,7 @@ class _SelectEarableViewState extends State<SelectEarableView> {
                   Wearable wearable = wearablesProvider.wearables[index];
                   return PlatformListTile(
                     title: PlatformText(wearable.name),
-                    subtitle: PlatformText(wearable.deviceId), //TODO: use device ID
+                    subtitle: PlatformText(wearable.deviceId), 
                     trailing: _selectedWearable == wearable
                         ? Icon(Icons.check)
                         : null,
